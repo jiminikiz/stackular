@@ -1,18 +1,25 @@
 {
-    "name": "stack",
-    "version": "4.0.0",
-    "description": "Express Server Stack Module",
-    "main": "index.js",
-    "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
-    },
-    "repository": {
-        "type": "git",
-        "url": "github.com/AugurTech/stack.git"
-    },
-    "dependencies": {
-        "colors": "*",
-        "ejs":"*",
-        "express":"4.x.x"
+  "name": "stack",
+  "version": "4.0.0",
+  "description": "Express Server Stack Module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com/AugurTech/stack.git"
+  },
+  "dependencies": {
+    "colors": "^1.1.2",
+    "ejs": "^2.5.1",
+    "express": "^4.14.0"
+  },
+  "eslintConfig": {
+    "env": {
+      "browser": true,
+      "node": true,
+      "es6": true
     }
+  }
 }

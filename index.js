@@ -17,10 +17,11 @@
 'use strict'; require('colors');
 ////////////////////////////////
 
-var Express = require('express');
+var express = require('express');
 
 module.exports = function ( options ) {
     console.log('\n==========================+'.cyan,'STACK','+=============================\n'.cyan);
+
     if( !options.root ) {
         console.error('You need to pass in the __dirname variable as [root] within options:', options);
         return process.exit(1);
@@ -47,7 +48,7 @@ module.exports = function ( options ) {
             return process.exit(1);
     }
 
-    var app = Express(), Readfile = require('fs').readFileSync;
+    var app = express(), Readfile = require('fs').readFileSync;
 
     app.set('upsince', Date.now());
 
@@ -60,18 +61,18 @@ module.exports = function ( options ) {
                 next();
             }
         },
-        nofavicon: ( req, res, next ) => {
+        noFavicon: ( req, res, next ) => {
             if ( req.url !== '/favicon.ico') {
                 next();
             } else {
                 res.status( 204 ).set('Content-Type','image/x-icon').end();
             }
         },
-        bodyparser: ( req, res, next ) => {
+        bodyParser: ( req, res, next ) => {
             // defined below
             new BodyBuilder(req,res,next);
         },
-        healthcheck: ( req ) => {
+        healthCheck: ( req ) => {
             req.res.end();
         },
         cookies: ( req, res, next ) => {
@@ -87,7 +88,6 @@ module.exports = function ( options ) {
                 }
                 req.cookies = jar;
             }
-
             next();
         },
         env: ( req, res, next ) => {
@@ -95,18 +95,13 @@ module.exports = function ( options ) {
             next();
         },
         logRequests: ( req, res, next ) => {
-            console.log(
-                Date.now() +':'+ new Date().toISOString(),
-                req.ip,
-                req.method,
-                req.url
-            );
+            console.log(`[${Date.now()}] - ${req.ip} - ${req.method} :: ${req.url}`);
             next();
         }
     };
 
-    // default options
-    app.disable('x-powered-by').enable('trust proxy');
+    // don't let clients know what kind of backend you are using ;)
+    app.disable('x-powered-by');
 
     if ( options.logRequests === true ) {
         app.use( app.middlewares.logRequests );
@@ -122,7 +117,11 @@ module.exports = function ( options ) {
         // the following will allow you to require html files directly in node
         // (mostly used for server-side template parsing via AJAX)
         require.extensions['.html'] = function (module, filename) { module.exports = Readfile(filename, 'utf8'); };
-        app.set('views', (options.root + (options.views.path||'/views')));
+
+        if( options.views.path ) {
+            app.set('views', options.views.path);
+        }
+
         app.engine('ejs',  require('ejs').renderFile);
         app.engine('htm',  require('ejs').renderFile);
         app.engine('html', require('ejs').renderFile);
@@ -136,10 +135,10 @@ module.exports = function ( options ) {
     }
 
     // expose the public folder by default
-    // @note: it is recommender that this is loaded after routes,
+    // @note: it is recommended that this is loaded after routes,
     // so that global middlewares can be applied to assets
     if( options.private !== true ) {
-        app.use(Express.static('public', {
+        app.use(express.static('public', {
             setHeaders: (res, path, fileprops) => {
                 // debugery
                 // console.log({
@@ -147,7 +146,7 @@ module.exports = function ( options ) {
                 //     fileprops: fileprops
                 // });
 
-                // Express should be doing this by default,
+                // express should be doing this by default,
                 // but for some reason we have seen this not to be the case...
                 res.set('Last-Modified', fileprops.mtime);
             }
@@ -160,16 +159,14 @@ module.exports = function ( options ) {
     if( options.ssl ) {
         // start the server with HTTPS as well if certs are supplied
         require('https').createServer({
-            ca: '',//Readfile( options.ssl.ca ),
-            cert: '',//Readfile( options.ssl.cert ),
-            key:  ''//Readfile( options.ssl.key )
-        }, app ).listen( port + 443, started);
+            ca:   Readfile( options.ssl.ca ),
+            cert: Readfile( options.ssl.cert ),
+            key:  Readfile( options.ssl.key )
+        }, app ).listen( port + 443, started );
     }
 
     return app;
 };
-
-module.exports.Express = Express;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
