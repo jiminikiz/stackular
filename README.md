@@ -5,20 +5,21 @@ This module is create for configuring multiple different servers that have only 
 
 ## Installation
 
-1. Add the following to your `package.json`:
-    ```javascript
-    "dependencies": {
-        "stackular": "ssh+git@github.com:jiminikiz/stackular.git"
-    }
-    ```
+```bash
 
-2. Install via NPM
-    ```bash
-    npm install
-    ```
+npm install --save jiminikiz/stackular
+
+```
 
 ## Usage
 > Initializing is pretty simple, it only accepts a configuration object as an argument.
+
+
+```javascript
+
+require('stackular')() // initializing with default options
+
+```
 
 ### Options
 > The object below shows all of the possible options of the configuration object:
