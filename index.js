@@ -1,16 +1,16 @@
-/* ================================================
- * ..######..########.########...######.##......##.
- * .##....##....##....##....##.##.......##....##...
- * .##..........##....##....##.##.......##..##.....
- * ..######.....##....########.##.......####.......
- * .......##....##....##....##.##.......##..##.....
- * .##....##....##....##....##.##.......##....##...
- * ..######.....##....##....##...######.##......##.
- * ================================================
- *  @author: [jiminikiz] | [augur.io]
- *  @version: 4.0.0
- *  @date: 2016-08-16
- * =================================================
+/* ====================================================================================
+ * ..######..########.########...######.##......##.##....##.##.......########.######...
+ * .##....##....##....##....##.##.......##....##...##....##.##.......##....##.##...##..
+ * .##..........##....##....##.##.......##..##.....##....##.##.......##....##.##...##..
+ * ..######.....##....########.##.......####.......##....##.##.......########.######...
+ * .......##....##....##....##.##.......##..##.....##....##.##.......##....##.##...##..
+ * .##....##....##....##....##.##.......##....##...##....##.##.......##....##.##....##.
+ * ..######.....##....##....##...######.##......##.########.########.##....##.##....##.
+ * ====================================================================================
+ *  @author: [jiminikiz] |
+ *  @version: 4.1.0
+ *  @date: 2016-10-25
+ * ====================================================================================
  */
 
 ////////////////////////////////
@@ -19,28 +19,21 @@
 
 var express = require('express');
 
-module.exports = function ( options ) {
-    console.log('\n==========================+'.cyan,'STACK','+=============================\n'.cyan);
-
-    if( !options.root ) {
-        console.error('You need to pass in the __dirname variable as [root] within options:', options);
-        return process.exit(1);
-    }
-
-    var port = options.port||process.env.PORT||13370;
+module.exports = ( options ) => {
+    var port = options.port||process.env.PORT||8888;
 
     switch ( process.env.NODE_ENV ) {
         case 'production':
-            console.log('# Production #'.bold.red);
-            console.info = function () {};
+            console.info('$[info]'.cyan,'ENV :: Production'.bold.red);
+            console.info = () => {};
             port = 0; // do not change this to 80, see below
         break;
         case 'staging':
-            console.log('# Staging #'.bold.yellow);
+            console.info('$[info]'.cyan,'ENV :: Staging'.bold.yellow);
             port = 0; // do not change this to 80, see below
         break;
         case 'development':
-            console.log('# Development #'.bold.green);
+            console.info('$[info]'.cyan,'ENV :: Development'.bold.green);
         break;
         default:
             console.error('You need to specify the environment.');
@@ -48,15 +41,16 @@ module.exports = function ( options ) {
             return process.exit(1);
     }
 
-    var app = express(), Readfile = require('fs').readFileSync;
+    var app = express();
 
     app.set('upsince', Date.now());
+    app.disable('x-powered-by');
 
-    app.middlewares = {
+    app.middleware = {
         secured: ( req, res, next ) => {
             if( req.protocol === 'http' || !req.headers['x-forwarded-proto'] ) {
                 res.set('X-Forwarded-Proto','https');
-                res.redirect('https://'+ req.headers.host + req.url);
+                res.redirect(`https://${req.headers.host}/${req.url}`);
             } else {
                 next();
             }
@@ -71,9 +65,6 @@ module.exports = function ( options ) {
         bodyParser: ( req, res, next ) => {
             // defined below
             new BodyBuilder(req,res,next);
-        },
-        healthCheck: ( req ) => {
-            req.res.end();
         },
         cookies: ( req, res, next ) => {
             if( req.headers.cookie !== undefined ) {
@@ -90,79 +81,54 @@ module.exports = function ( options ) {
             }
             next();
         },
-        env: ( req, res, next ) => {
-            res.locals.env = res.app.locals.settings.env;
-            next();
-        },
-        logRequests: ( req, res, next ) => {
-            console.log(`[${Date.now()}] - ${req.ip} - ${req.method} :: ${req.url}`);
+        logger: ( req, res, next ) => {
+            console.log(`[${Date.now()}] ${req.method} :: ${req.ip} - ${req.url}`);
             next();
         }
     };
 
-    // don't let clients know what kind of backend you are using ;)
-    app.disable('x-powered-by');
-
-    if ( options.logRequests === true ) {
-        app.use( app.middlewares.logRequests );
-    }
-
-    // prevent express from auto requesting the (route|asset): "/favicon.ico"
-    if ( options.favicon !== true ) {
-        app.use( app.middlewares.nofavicon );
+    if( options.middleware && options.middleware.length ) {
+        options.middleware.map((ware) => {
+            if( app.middleware[ware] ) {
+                app.use(app.middleware[ware]);
+                console.info('$[info]'.cyan, '(middleware loaded)'.green, ware);
+            } else {
+                console.warn('$[warn]'.yellow, '(middleware unknown)'.red, ware);
+            }
+        });
     }
 
     // load this before routes so that we have access to [req.render]
     if( options.views ) {
-        // the following will allow you to require html files directly in node
-        // (mostly used for server-side template parsing via AJAX)
-        require.extensions['.html'] = function (module, filename) { module.exports = Readfile(filename, 'utf8'); };
-
         if( options.views.path ) {
             app.set('views', options.views.path);
         }
-
-        app.engine('ejs',  require('ejs').renderFile);
-        app.engine('htm',  require('ejs').renderFile);
-        app.engine('html', require('ejs').renderFile);
+        if( options.views.engine ) {
+            app.set('view engine', options.views.engine);
+        }
     } else {
         app.disable('views');
     }
 
     // load routes
-    if( options.routes ) {
-        require(options.root +'/routes')( app );
+    if( options.routes && options.routes.path ) {
+        require(options.routes.path)( app );
     }
-
     // expose the public folder by default
     // @note: it is recommended that this is loaded after routes,
-    // so that global middlewares can be applied to assets
-    if( options.private !== true ) {
-        app.use(express.static('public', {
-            setHeaders: (res, path, fileprops) => {
-                // debugery
-                // console.log({
-                //     path: path,
-                //     fileprops: fileprops
-                // });
-
-                // express should be doing this by default,
-                // but for some reason we have seen this not to be the case...
-                res.set('Last-Modified', fileprops.mtime);
-            }
-        }));
+    // so that global middleware can be applied to assets
+    if( options.fileServer && options.fileServer.path ) {
+        app.use(express.static(options.fileServer.path));
     }
 
     // start the server with an HTTP protocol
-    require('http').createServer( app ).listen( port || 80, started );
+    app.listen( port || 80, started );
 
-    if( options.ssl ) {
+    if( options.https ) {
         // start the server with HTTPS as well if certs are supplied
-        require('https').createServer({
-            ca:   Readfile( options.ssl.ca ),
-            cert: Readfile( options.ssl.cert ),
-            key:  Readfile( options.ssl.key )
-        }, app ).listen( port + 443, started );
+        require('https')
+            .createServer(options.https, app )
+            .listen( port + 443, started );
     }
 
     return app;
@@ -172,8 +138,8 @@ module.exports = function ( options ) {
 
 function BodyBuilder( req, res, next ) {
     this.body = '';
-    this.req = req;
-    this.res = res;
+    this.req  = req;
+    this.res  = res;
     this.next = next;
 
     req.on('data', ( chunk ) => {
@@ -185,5 +151,5 @@ function BodyBuilder( req, res, next ) {
 }
 
 function started() {
-    console.log('# Server started on port:'.cyan, this.address().port );
+    console.info(`${"$[info]".cyan} Server started on port:`, this.address().port.toString().bold.yellow);
 }

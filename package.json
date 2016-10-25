@@ -1,6 +1,6 @@
 {
-  "name": "stack",
-  "version": "4.0.0",
+  "name": "stackular",
+  "version": "4.1.0",
   "description": "Express Server Stack Module",
   "main": "index.js",
   "scripts": {
@@ -8,13 +8,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "github.com/AugurTech/stack.git"
+    "url": "github.com/jiminikiz/stackular.git"
   },
   "dependencies": {
     "colors": "^1.1.2",
-    "ejs": "^2.5.1",
     "express": "^4.14.0"
   },
+  "license": "MIT",
   "eslintConfig": {
     "env": {
       "browser": true,
