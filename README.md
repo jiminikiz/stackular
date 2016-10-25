@@ -14,7 +14,7 @@ This module is create for configuring multiple different servers that have only 
 
 2. Install via NPM
     ```bash
-    npm Install
+    npm install
     ```
 
 ## Usage
