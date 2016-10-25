@@ -5,15 +5,10 @@ This module is create for configuring multiple different servers that have only 
 
 ## Installation
 
-1. Add the following line to your `package.json`:
-    ```json
-    {
-        ...
-        "dependencies": {
-            "stackular": "ssh+git@github.com:jiminikiz/stackular.git"
-            ...
-        }
-        ...
+1. Add the following to your `package.json`:
+    ```javascript
+    "dependencies": {
+        "stackular": "ssh+git@github.com:jiminikiz/stackular.git"
     }
     ```
 
@@ -58,7 +53,7 @@ require('stackular')({
 });
 ```
 
-### Built-in Middlewares
+### Built-in Middleware
 > Each built-in middleware was created as a simple function. This keeps the code base for `stackular` very lightweight reduces dependencies on other third-party modules.
 
 - `secured`     :: redirects all traffic to HTTPS
