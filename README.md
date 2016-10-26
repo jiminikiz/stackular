@@ -1,7 +1,7 @@
 # Stackular
 > A config driven express initializer
 
-This module is create for configuring multiple different servers that have only slightly different configurations.
+Initialize express in one line with the most common boiler plate options already enabled.
 
 ## Installation
 
@@ -12,7 +12,7 @@ npm install --save jiminikiz/stackular
 ```
 
 ## Usage
-> Initializing is pretty simple, it only accepts a configuration object as an argument.
+> Initializing is pretty simple:
 
 
 ```javascript
