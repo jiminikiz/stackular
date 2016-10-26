@@ -82,7 +82,7 @@ module.exports = ( options ) => {
             next();
         },
         logger: ( req, res, next ) => {
-            console.log(`[${Date.now()}] ${req.method} :: ${req.ip} - ${req.url}`);
+            console.log(`[${Date.now()}] ${req.method.toString().cyan} :: ${req.ip} - ${req.url}`);
             next();
         }
     };
