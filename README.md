@@ -28,38 +28,29 @@ require('stackular')() // initializing with default options
 
 // Options are not required; you can initialize the module simply with: require('stackular')();
 require('stackular')({
-    port: 8888,                         // Number, default is 8888
-    middleware: [                       // Array, default is null
-        `secured`
-        `noFavicon`
-        `bodyParser`
-        `cookies`
-        `logger`
+    port: 8888,     // Number, default is 8888
+    middleware: [   // Array, default is undefined
+        `secured`       // > redirects all traffic to HTTPS
+        `noFavicon`     // > skips requests for `/favicon.ico`
+        `bodyParser`    // > parses **form-url-encoded** strings
+        `cookies`       // > a simple cookie-parser
+        `logger`        // > a very simple request logger
     ],
-    views: {                            // Object, default is null;
-        path: `${__dirname}/views`,     // String, default is null;
-        engine: `ejs` || `pug`,         // String, default is null;
+    views: {                            // Object, default is undefined
+        path: `${__dirname}/views`,     // String, default is `${__dirname}/views`
+        engine: `ejs` || `pug`,         // String, default is undefined
     },
     routes: {
-        path: `${__dirname}/routes`,    // String, default is null;
+        path: `${__dirname}/routes`,    // String, default is undefined
     },
     fileServer: {
-        path: ''                        // String, no default; Recommended: `${__dirname}/public`
+        path: `${__dirname}/public`     // String, default is undefined
     },
-    https: {                            // Object, same object used with the native node `https` module,
-                                        // i.e. https.createServer(options);
+    https: { // Object, same object used with the native node `https` module,
+        // > i.e. https.createServer(options);
         key:  fs.readFileSync('/path/to/key'),
         cert: fs.readFileSync('/path/to/cert')
     }                   
 });
 
 ```
-
-### Built-in Middleware
-> Each built-in middleware was created as a simple function. This keeps the code base for `stackular` very lightweight reduces dependencies on other third-party modules.
-
-- `secured`     :: redirects all traffic to HTTPS
-- `noFavicon`   :: skips requests for `/favicon.ico`
-- `bodyParser`  :: parses **form-url-encoded** strings
-- `cookies`     :: a simple cookie-parser
-- `logger`      :: a very simple request logger
