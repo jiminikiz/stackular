@@ -92,8 +92,10 @@ module.exports = ( options ) => {
             if( app.middleware[ware] ) {
                 app.use(app.middleware[ware]);
                 console.info('$[info]'.cyan, '(middleware loaded)'.green, ware);
+            } else if( ware.constructor === Function ) {
+                app.use(ware);
             } else {
-                console.warn('$[warn]'.yellow, '(middleware unknown)'.red, ware);
+                console.warn('$[warn]'.yellow, '(unknown middleware)'.red, ware);
             }
         });
     }
