@@ -43,6 +43,7 @@ module.exports = (options) => {
 
   var app = express();
 
+  app.set('config', options);
   app.set('upsince', Date.now());
   app.disable('x-powered-by');
 
@@ -132,8 +133,6 @@ module.exports = (options) => {
     .createServer(options.https, app)
     .listen(port + 443, started);
   }
-
-  app.set('config', options);
 
   return app;
 };
