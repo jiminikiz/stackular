@@ -1,6 +1,6 @@
 {
   "name": "stackular",
-  "version": "4.1.0",
+  "version": "4.1.1",
   "description": "Express Server Stack Module",
   "main": "index.js",
   "scripts": {

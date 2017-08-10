@@ -133,6 +133,8 @@ module.exports = (options) => {
     .listen(port + 443, started);
   }
 
+  app.set('config', options);
+
   return app;
 };
 
